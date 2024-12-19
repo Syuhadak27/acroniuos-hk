@@ -437,7 +437,7 @@ def check_storage_threshold(size, threshold, arch=False, alloc=False):
     return True
 
 
-async def command_listener(message, isClone=False, isGdrive=False, isJd=False, isLeech=False, isMega=False, isMirror=False, isQbit=False, isYtdl=False):
+async def command_listener(message, isClone=False, isGdrive=False, isLeech=False, isMega=False, isMirror=False, isQbit=False, isYtdl=False):
     msg = ""
     tag = await get_tag(message)
 
@@ -446,8 +446,6 @@ async def command_listener(message, isClone=False, isGdrive=False, isJd=False, i
             msg = f"Hey {tag}.\n\nCloning file in Gdrive is disabled."
         elif isGdrive and not config_dict['GDRIVE_ENABLED']:
             msg = f"Hey {tag}.\n\nGdrive link is disabled."
-        elif isJd and not config_dict['JD_ENABLED']:
-            msg = f"Hey {tag}.\n\nJDownload is disabled."
         elif isLeech and not config_dict['LEECH_ENABLED']:
             msg = f"Hey {tag}.\n\nLeeching file in telegram is disabled."
         elif isMega and not config_dict['MEGA_ENABLED']:
@@ -676,22 +674,11 @@ async def set_commands(bot):
             BotCommand(BotCommands.CancelTaskCommand[0], "Cancel any task"),
             BotCommand(BotCommands.CancelAllCommand, "Cancel all task"),
             BotCommand(BotCommands.ListCommand, "Search file in google drive"),
-            BotCommand(BotCommands.DeleteCommand, "Delete google drive file"),
-            BotCommand(BotCommands.ForceStartCommand[0], "Force start a task"),
             BotCommand(BotCommands.ListCommand, "List files in Google Drive"),
-            BotCommand(BotCommands.SearchCommand, "Search files in Google Drive"),
-            BotCommand(BotCommands.UsersCommand, "Check users"),
-            BotCommand(BotCommands.AuthorizeCommand, "Authorize a user"),
-            BotCommand(BotCommands.UnAuthorizeCommand, "Unauthorize a user"),
-            BotCommand(BotCommands.AddSudoCommand, "Add a sudo user"),
-            BotCommand(BotCommands.RmSudoCommand, "Remove a sudo user"),
-            BotCommand(BotCommands.PingCommand, "Ping the bot"),
+            BotCommand(BotCommands.SearchCommand, "Search For Torrent Site"),
             BotCommand(BotCommands.HelpCommand, "Get help"),
-            BotCommand(BotCommands.LogCommand, "Get bot log"),
-            BotCommand(BotCommands.BotSetCommand[0], "Bot settings"),
             BotCommand(BotCommands.UserSetCommand[0], "User settings"),
             BotCommand(BotCommands.BtSelectCommand, "Select a BT download"),
-            BotCommand(BotCommands.RssCommand, "Manage RSS feeds"),
         ])
 
 
@@ -710,9 +697,8 @@ async def start(client, message):
         return await send_to_chat(message=message, text=f"Token refreshed successfully", buttons=None, reply=True, photo=True)
     else:
         buttons = ButtonMaker()
-        buttons.ubutton("Repo", "https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
-        buttons.ubutton("Owner", "https://t.me/AtrociousMirrorBackup")
-        reply_markup = buttons.build_menu(2)
+        buttons.ubutton("Owner", "https://t.me/xyradelw")
+        reply_markup = buttons.build_menu(1)
         start_string = f'''This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands'''
         await send_to_chat(message=message, text=start_string, buttons=reply_markup, reply=True, photo=True)
     await DbManager().update_pm_users(message.from_user.id)

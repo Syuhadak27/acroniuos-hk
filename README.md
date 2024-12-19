@@ -106,21 +106,12 @@ programming in Python.
 - Embed the original thumbnail and add it for leech
 - All supported audio formats
 
-## JDownloader
-
-- Synchronize Settings (global option)
-- Waiting to select (enable/disable files or change variants) before download start
-- DLC file support
-- All settings can be edited from the remote access to your JDownloader with Web Interface, Android App, iPhone App or
-  Browser Extensions
-
 ## Mongo Database
 
 - Store bot settings
 - Store user settings including thumbnails and all private files
 - Store RSS data
 - Store incompleted task messages
-- Store JDownloader settings
 - Store config.env file on first build and incase any change occured to it, then next build it will define variables
   from config.env instead of database
 
@@ -355,10 +346,10 @@ quotes, even if it's `Int`, `Bool` or `List`.
       decrease `AsyncIOThreadsCount`, set limit of `DiskWriteCacheSize` to `32` and decrease `MemoryWorkingSetLimit`
       from qbittorrent.conf or bsetting command.
 
-**8. JDownloader**
+**8. MegaSDK**
 
-- `JD_EMAIL`: jdownlaoder email sign up on [JDownloader](https://my.jdownloader.org/)
-- `JD_PASS`: jdownlaoder password
+- `MEGA_EMAIL`: MEGASDK email
+- `MEGA_PASS`: MEGASDK password
 
 **9. RSS**
 
@@ -503,11 +494,9 @@ sudo docker compose logs --follow
 ```
 mirror - or /m Mirror
 qbmirror - or /qm Mirror torrent using qBittorrent
-jdmirror - or /jm Mirror using jdownloader
 ytdl - or /y Mirror yt-dlp supported links
 leech - or /l Upload to telegram
 qbleech - or /ql Leech torrent using qBittorrent
-jdleech - or /jl Leech using jdownloader
 ytdlleech - or /yl Leech yt-dlp supported links
 clone - Copy file/folder to Drive
 count - Count file/folder from GDrive

@@ -288,7 +288,7 @@ class TaskListener(TaskConfig):
                     if config_dict["BOT_PM"] and self.message.chat.type != self.message.chat.type.PRIVATE:
                         await sendMessage(self.message, msg + fmsg + pmmsg, pmbutton)
                     else:
-                        await sendMessage(self.message, msg + fmsg)
+                        await sendMessage(self.message, msg)
         else:
             msg += f"\n<b>• Type: </b>{mime_type}"
             if mime_type == "Folder":
