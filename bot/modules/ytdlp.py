@@ -1,4 +1,3 @@
-from aiohttp import ClientSession
 from asyncio import wait_for, Event, wrap_future
 from functools import partial
 from pyrogram.filters import command, regex, user
@@ -241,20 +240,6 @@ def extract_info(link, options):
         if result is None:
             raise ValueError("Info result is None")
         return result
-
-
-async def _mdisk(link, name):
-    key = link.split("/")[-1]
-    async with ClientSession() as session:
-        async with session.get(
-            f"https://diskuploader.entertainvideo.com/v1/file/cdnurl?param={key}"
-        ) as resp:
-            if resp.status == 200:
-                resp_json = await resp.json()
-                link = resp_json["source"]
-                if not name:
-                    name = resp_json["filename"]
-            return name, link
 
 
 class YtDlp(TaskListener):
