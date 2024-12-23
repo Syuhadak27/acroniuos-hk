@@ -2,7 +2,7 @@ from asyncio import sleep
 from pyrogram.filters import command, regex
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 
-from bot import task_dict, bot, task_dict_lock, OWNER_ID, user_data, multi_tags
+from bot import task_dict, bot, task_dict_lock, OWNER_ID, user_data, multi_tags, bot_name
 from bot.helper.ext_utils.bot_utils import new_task
 from bot.helper.ext_utils.status_utils import getTaskByGid, getAllTasks, MirrorStatus
 from bot.helper.telegram_helper import button_build
@@ -17,38 +17,35 @@ from bot.helper.telegram_helper.message_utils import (
 
 
 async def cancel_task(_, message):
-    user_id = message.from_user.id if message.from_user else message.sender_chat.id
-    msg = message.text.split()
+    user_id = message.from_user.id
+    msg = message.text.split("_", maxsplit=1)
+    await deleteMessage(message)
+
     if len(msg) > 1:
-        gid = msg[1]
-        if len(gid) == 4:
-            multi_tags.discard(gid)
+        cmd_data = msg[1].split("@", maxsplit=1)
+        if len(cmd_data) > 1 and cmd_data[1].strip() != bot_name:
             return
-        else:
-            task = await getTaskByGid(gid)
-            if task is None:
-                await sendMessage(message, f"GID: <code>{gid}</code> Not Found.")
-                return
+        gid = cmd_data[0]
+        task = await getTaskByGid(gid)
+        if task is None:
+            await deleteMessage(message)
+            return
     elif reply_to_id := message.reply_to_message_id:
         async with task_dict_lock:
-            task = task_dict.get(reply_to_id)
+            task = task_dict.get(reply_to_id, None)
         if task is None:
-            await sendMessage(message, "This is not an active task!")
+            await deleteMessage(message)
             return
     elif len(msg) == 1:
-        msg = (
-            "Reply to an active Command message which was used to start the download"
-            f" or send <code>/{BotCommands.CancelTaskCommand[0]} GID</code> to cancel it!"
-        )
-        await sendMessage(message, msg)
+        await deleteMessage(message)
         return
-    if (
-        OWNER_ID != user_id
-        and task.listener.userId != user_id
-        and (user_id not in user_data or not user_data[user_id].get("is_sudo"))
+
+    if user_id not in (OWNER_ID, task.listener.userId) and (
+        user_id not in user_data or not user_data[user_id].get("is_sudo")
     ):
-        await sendMessage(message, "This task is not for you!")
+        await deleteMessage(message)
         return
+
     obj = task.task()
     await obj.cancel_task()
 
@@ -172,6 +169,12 @@ bot.add_handler(
     MessageHandler(
         cancell_all_buttons,
         filters=command(BotCommands.CancelAllCommand) & CustomFilters.authorized,
+    )
+)
+bot.add_handler(
+    MessageHandler(
+        cancel_task,
+        filters=regex(r"^/cancel(_\w+)?(?!all)") & CustomFilters.authorized,
     )
 )
 bot.add_handler(CallbackQueryHandler(cancel_all_update, filters=regex("^canall")))
