@@ -11,6 +11,8 @@ class MegaDownloadStatus:
         self._size = size
         self._gid = gid
         self.listener = listener
+        self.message = self.listener.message
+        self.engine = "MegaPY"
 
     def name(self):
         return self.listener.name
@@ -25,7 +27,7 @@ class MegaDownloadStatus:
         return f"{self.progress_raw()}%"
 
     def status(self):
-        return MirrorStatus.STATUS_DOWNLOAD
+        return MirrorStatus.STATUS_DOWNLOADING
 
     def processed_bytes(self):
         return get_readable_file_size(self._obj.downloaded_bytes)
