@@ -170,6 +170,8 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         tasks[start_position : STATUS_LIMIT + start_position], start=1
     ):
         tstatus = await sync_to_async(task.status) if status == "All" else status
+        task_gid = task.gid()
+        cancel_task = f"<code>/cancel_{task_gid}</code>" if "-" in task_gid else f"<b>/cancel_{task_gid}</b>"
         if task.listener.isSuperChat:
             msg += f"<b>{index + start_position}.<a href='{task.listener.message.link}'>{tstatus}</a>: </b>"
         else:
@@ -203,7 +205,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             msg += f" | <b>Time: </b>{task.seeding_time()}"
         else:
             msg += f"\n<b>Size: </b>{task.size()}"
-        msg += f"\n<b>/cancel_{task.gid()}</b>\n\n"
+        msg += f"\n{cancel_task}\n\n"
 
     if len(msg) == 0:
         if status == "All":
@@ -211,21 +213,11 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         else:
             msg = f"No Active {status} Tasks!\n\n"
     buttons = ButtonMaker()
-    if not is_user:
-        buttons.ibutton("📜", f"status {sid} ov", position="header")
     if len(tasks) > STATUS_LIMIT:
         msg += f"<b>Page:</b> {page_no}/{pages} | <b>Tasks:</b> {tasks_no} | <b>Step:</b> {page_step}\n"
         buttons.ibutton("<<", f"status {sid} pre", position="header")
         buttons.ibutton(">>", f"status {sid} nex", position="header")
-        if tasks_no > 30:
-            for i in [1, 2, 4, 6, 8, 10, 15]:
-                buttons.ibutton(i, f"status {sid} ps {i}", position="footer")
-    if status != "All" or tasks_no > 20:
-        for label, status_value in list(STATUSES.items())[:9]:
-            if status_value != status:
-                buttons.ibutton(label, f"status {sid} st {status_value}")
-    buttons.ibutton("♻️", f"status {sid} ref", position="header")
-    button = buttons.build_menu(8)
+        button = buttons.build_menu(2)
     msg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
     msg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {get_readable_time(time() - botStartTime)}"
     return msg, button
