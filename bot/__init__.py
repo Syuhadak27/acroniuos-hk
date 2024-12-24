@@ -20,7 +20,7 @@ from pyrogram import Client as tgClient, enums, utils
 from qbittorrentapi import Client as qbClient
 from socket import setdefaulttimeout
 from subprocess import Popen, run
-from time import time
+from time import time, sleep
 from tzlocal import get_localzone
 from uvloop import install
 
@@ -671,6 +671,9 @@ else:
         if v in ["", "*"]:
             del qb_opt[k]
     get_qb_client().app_set_preferences(qb_opt)
+
+alive = Popen(["python3", "alive.py"])
+sleep(0.5)
 
 aria2 = ariaAPI(ariaClient(host="http://localhost", port=6800, secret=""))
 if not aria2_options:
