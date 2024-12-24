@@ -168,11 +168,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         tasks[start_position : STATUS_LIMIT + start_position], start=1
     ):
         tstatus = await sync_to_async(task.status) if status == "All" else status
-        if config_dict['SAFE_MODE']:
-            msg += f"<b>{index + start_position}.{tstatus}: Procesing your request.</b>"
-        else:
-            msg += f"<b>{index + start_position}.<a href='{task.listener.message.link}'>{tstatus}</a>: </b>"
-            msg += f"<code>{escape(f'{task.name()}')}</code>"
+        msg += f"<b>{tstatus}:</b> <code>{escape(f'{task.name()}')}</code>"
         if tstatus not in [
             MirrorStatus.STATUS_SPLITTING,
             MirrorStatus.STATUS_SEEDING,
@@ -185,7 +181,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
                 if iscoroutinefunction(task.progress)
                 else task.progress()
             )
-            msg += f"\n{get_progress_bar_string(progress)} {progress}"
+            msg += f"\n<b>Task:</b> {progress}"
             msg += f"\n<b>Done:</b> {task.processed_bytes()} of {task.size()}"
             msg += f"\n<b>Speed:</b> {task.engine} {task.speed()}"
             msg += f"\n<b>ETA:</b> {task.eta()} | <b>Elapsed:</b> {get_readable_time(time() - task.message.date.timestamp())}"
@@ -203,7 +199,9 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             msg += f" | <b>Time: </b>{task.seeding_time()}"
         else:
             msg += f"\n<b>Size: </b>{task.size()}"
-        msg += f"\n<b>Stop: </b><b>/{BotCommands.CancelTaskCommand[0]}_{task.gid()}</b>\n\n"
+            msg += f"\n<b>User:</b> {task.listener.message.from_user.mention(style='html')} | <b>ID:</b> <code>{task.listener.message.from_user.id}</code>"
+            msg += f"\n<b>Engine: </b>{task.engine}"
+        msg += f"\n<b>/{BotCommands.CancelTaskCommand[0]}_{task.gid()}</b>\n\n"
 
     if len(msg) == 0:
         if status == "All":
