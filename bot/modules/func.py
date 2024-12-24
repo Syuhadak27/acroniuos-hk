@@ -699,7 +699,7 @@ async def start(client, message):
         buttons = ButtonMaker()
         buttons.ubutton("Owner", "https://t.me/xyradelw")
         reply_markup = buttons.build_menu(1)
-        start_string = f'''This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands'''
+        start_string = f'''<b>Hi {message.from_user.mention(style='html')} \n\nThis bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands</b>'''
         await send_to_chat(message=message, text=start_string, buttons=reply_markup, reply=True, photo=True)
     await DbManager().update_pm_users(message.from_user.id)
 
