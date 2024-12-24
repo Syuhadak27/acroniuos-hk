@@ -253,19 +253,17 @@ class TaskListener(TaskConfig):
             and DATABASE_URL
         ):
             await DbManager().rm_complete_task(self.message.link)
-        pmbutton = await get_bot_pm_button()
-        msg = f"<b>{escape(self.name)}</b>"
+        msg = f"<b>Hey {self.tag}!\nYour job is done.</b>"
         msg += f"\n\n<b>Size: </b>{get_readable_file_size(self.size)}"
         LOGGER.info(f"Task Done: {self.name}")
         if self.isLeech:
             msg += f"\n<b>Total Files: </b>{folders}"
             if mime_type != 0:
                 msg += f"\n<b>Corrupted Files: </b>{mime_type}"
-            msg += f"\n\n<b>User: </b>{self.tag}\n\n"
             if not files:
                 if config_dict["BOT_PM"] and self.message.chat.type != self.message.chat.type.PRIVATE:
-                    pmmsg = f"<b>Files has been sent in private.</b>"
-                    await sendMessage(self.message, msg +pmmsg, pmbutton)
+                    pmmsg = f"\n\n<b>Files has been sent in private.</b>"
+                    await sendMessage(self.message, msg +pmmsg)
                 else:
                     await sendMessage(self.message, msg)
             else:
@@ -279,11 +277,11 @@ class TaskListener(TaskConfig):
                 if fmsg != "":
                     if config_dict["SAFE_MODE"]:
                         fmsg = ""
-                        pmmsg = f"<b>Files has been sent in private.</b>"
+                        pmmsg = f"\n\n<b>Files has been sent in private.</b>"
                     else:
-                        pmmsg = f"\n<b>Files has been sent in private.</b>"
+                        pmmsg = f"\n\n<b>Files has been sent in private.</b>"
                     if config_dict["BOT_PM"] and self.message.chat.type != self.message.chat.type.PRIVATE:
-                        await sendMessage(self.message, msg + fmsg + pmmsg, pmbutton)
+                        await sendMessage(self.message, msg + fmsg + pmmsg)
                     else:
                         await sendMessage(self.message, msg)
         else:
@@ -329,11 +327,10 @@ class TaskListener(TaskConfig):
             else:
                 msg += f"\n\nPath: <code>{rclonePath}</code>"
                 button = None
-            msg += f"\n\n<b>User: </b>{self.tag}"
             if config_dict["BOT_PM"] and self.message.chat.type != self.message.chat.type.PRIVATE:
-                bmsg = f"\n<b>Links has been sent in private.</b>"
+                bmsg = f"\n\n<b>Links has been sent in private.</b>"
                 await send_to_chat(chat_id=self.message.from_user.id, message=self.message, text=msg, buttons=button, photo=True)
-                await sendMessage(self.message, msg+bmsg, pmbutton)
+                await sendMessage(self.message, msg+bmsg)
             else:
                 await sendMessage(self.message, msg, button)
         if self.seed:
