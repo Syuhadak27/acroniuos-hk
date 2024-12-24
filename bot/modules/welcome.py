@@ -14,7 +14,7 @@ async def welcome(client, message):
         join_date = now.strftime("%Y-%m-%d")
         join_time = now.strftime("%I:%M:%S %p")
         chat_members_count = await client.get_chat_members_count(message.chat.id)
-        msg = f"Hlw {member_name} {user_name}\n"
+        msg = f"New member report! {member_name} {user_name}\n"
         msg += f"Your ID: <code>{user_id}</code>\n"
         msg += f"Join date: {join_date}\n"
         msg += f"Join time: {join_time}\n"

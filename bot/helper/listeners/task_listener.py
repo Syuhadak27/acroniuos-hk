@@ -254,10 +254,7 @@ class TaskListener(TaskConfig):
         ):
             await DbManager().rm_complete_task(self.message.link)
         pmbutton = await get_bot_pm_button()
-        if config_dict["SAFE_MODE"]:
-            msg = f"<b>Safe Mode Enabled</b>"
-        else:
-            msg = f"<b>Name: </b><code>{escape(self.name)}</code>"
+        msg = f"<b>{escape(self.name)}</b>"
         msg += f"\n\n<b>• Size: </b>{get_readable_file_size(self.size)}"
         LOGGER.info(f"Task Done: {self.name}")
         if self.isLeech:

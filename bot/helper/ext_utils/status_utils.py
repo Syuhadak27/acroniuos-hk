@@ -169,7 +169,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
     ):
         tstatus = await sync_to_async(task.status) if status == "All" else status
         if config_dict['SAFE_MODE']:
-            msg += f"<b>{index + start_position}.{tstatus}: Safe Mode.</b>"
+            msg += f"<b>{index + start_position}.{tstatus}: Procesing your request.</b>"
         else:
             msg += f"<b>{index + start_position}.<a href='{task.listener.message.link}'>{tstatus}</a>: </b>"
             msg += f"<code>{escape(f'{task.name()}')}</code>"

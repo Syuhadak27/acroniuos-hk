@@ -3,8 +3,9 @@ from asyncio import sleep
 from functools import partial
 from html import escape
 from io import BytesIO
-from os import getcwd
+from os import getcwd, path as ospath
 from pyrogram.filters import command, regex, create
+from pyrogram.types import InputMediaPhoto
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 from time import time
 
@@ -206,14 +207,36 @@ YT-DLP Options is <b><code>{escape(ytopt)}</code></b>"""
 
 async def update_user_settings(query):
     msg, button = await get_user_settings(query.from_user)
-    await editMessage(query.message, msg, button)
+    user_id = query.from_user.id
+    media = (
+        f"Thumbnails/{user_id}.jpg"
+        if ospath.exists(f"Thumbnails/{user_id}.jpg")
+        else f"xyrad.jpg"
+    )
+    await query.message.edit_media(
+        media=InputMediaPhoto(
+            media=media,
+            caption=msg
+        ),
+        reply_markup=button
+    )
 
 
 async def user_settings(_, message):
     from_user = message.from_user
     handler_dict[from_user.id] = False
+    user_id = from_user.id
     msg, button = await get_user_settings(from_user)
-    await sendMessage(message, msg, button)
+    media = (
+        f"Thumbnails/{user_id}.jpg"
+        if ospath.exists(f"Thumbnails/{user_id}.jpg")
+        else f"xyrad.jpg"
+    )
+    await message.reply_photo(
+        media,
+        caption=msg,
+        reply_markup=button
+    )
 
 
 async def set_thumb(_, message, pre_event):
