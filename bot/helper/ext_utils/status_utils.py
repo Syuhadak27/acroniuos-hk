@@ -13,7 +13,6 @@ from bot import (
 )
 from bot.helper.ext_utils.bot_utils import sync_to_async
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.telegram_helper.bot_commands import BotCommands
 
 SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"]
 
@@ -120,6 +119,11 @@ def get_readable_time(seconds: int):
     return result
 
 
+def time_to_seconds(time_duration):
+    hours, minutes, seconds = map(int, time_duration.split(":"))
+    return hours * 3600 + minutes * 60 + seconds
+
+
 def speed_string_to_bytes(size_text: str):
     size = 0
     size_text = size_text.lower()
@@ -139,18 +143,16 @@ def speed_string_to_bytes(size_text: str):
 def get_progress_bar_string(pct):
     pct = float(pct.strip("%"))
     p = min(max(pct, 0), 100)
-    cFull = int(p // 10)
+    cFull = int(p // 8)
     p_str = "■" * cFull
-    p_str += "□" * (10 - cFull)
+    p_str += "□" * (12 - cFull)
     return f"[{p_str}]"
 
 
 async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=1):
     msg = ""
     button = None
-    if config_dict['STATUS_HEADER']:
-        msg += f"<b>{config_dict['STATUS_HEADER']}</b>\n\n"
-        
+
     tasks = await sync_to_async(getSpecificTasks, status, sid if is_user else None)
 
     STATUS_LIMIT = config_dict["STATUS_LIMIT"]
@@ -168,7 +170,11 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         tasks[start_position : STATUS_LIMIT + start_position], start=1
     ):
         tstatus = await sync_to_async(task.status) if status == "All" else status
-        msg += f"<b>{tstatus}:</b> <code>{escape(f'{task.name()}')}</code>"
+        if task.listener.isSuperChat:
+            msg += f"<b>{index + start_position}.<a href='{task.listener.message.link}'>{tstatus}</a>: </b>"
+        else:
+            msg += f"<b>{index + start_position}.{tstatus}: </b>"
+        msg += f"<code>{escape(f'{task.name()}')}</code>"
         if tstatus not in [
             MirrorStatus.STATUS_SPLITTING,
             MirrorStatus.STATUS_SEEDING,
@@ -181,11 +187,9 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
                 if iscoroutinefunction(task.progress)
                 else task.progress()
             )
-            msg += f"\n<b>Task:</b> {progress}"
-            msg += f"\n<b>Done:</b> {task.processed_bytes()} of {task.size()}"
-            msg += f"\n<b>Speed:</b> {task.engine} {task.speed()}"
-            msg += f"\n<b>ETA:</b> {task.eta()} | <b>Elapsed:</b> {get_readable_time(time() - task.message.date.timestamp())}"
-            msg += f"\n<b>User:</b> {task.listener.message.from_user.mention(style='html')} | <b>ID:</b> <code>{task.listener.message.from_user.id}</code>"
+            msg += f"\n{get_progress_bar_string(progress)} {progress}"
+            msg += f"\n<b>Processed:</b> {task.processed_bytes()} of {task.size()}"
+            msg += f"\n<b>Speed:</b> {task.speed()} | <b>ETA:</b> {task.eta()}"
             if hasattr(task, "seeders_num"):
                 try:
                     msg += f"\n<b>Seeders:</b> {task.seeders_num()} | <b>Leechers:</b> {task.leechers_num()}"
@@ -199,9 +203,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             msg += f" | <b>Time: </b>{task.seeding_time()}"
         else:
             msg += f"\n<b>Size: </b>{task.size()}"
-            msg += f"\n<b>User:</b> {task.listener.message.from_user.mention(style='html')} | <b>ID:</b> <code>{task.listener.message.from_user.id}</code>"
-            msg += f"\n<b>Engine: </b>{task.engine}"
-        msg += f"\n<b>/{BotCommands.CancelTaskCommand[0]}_{task.gid()}</b>\n\n"
+        msg += f"\n<b>/cancel_{task.gid()}</b>\n\n"
 
     if len(msg) == 0:
         if status == "All":
@@ -222,12 +224,8 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         for label, status_value in list(STATUSES.items())[:9]:
             if status_value != status:
                 buttons.ibutton(label, f"status {sid} st {status_value}")
-    if config_dict['BOT_MAX_TASKS']:
-        msg += f"<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {len(tasks)} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - len(tasks)}"
-    else:
-        msg += f"<b>Tasks Running:</b> {len(tasks)}"
     buttons.ibutton("♻️", f"status {sid} ref", position="header")
     button = buttons.build_menu(8)
-    msg += f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
-    msg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UP:</b> {get_readable_time(time() - botStartTime)}"
+    msg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
+    msg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {get_readable_time(time() - botStartTime)}"
     return msg, button
